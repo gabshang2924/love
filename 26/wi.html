@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Love Envelope</title>
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Indie Flower', cursive;
+      overflow: hidden;
+      position: relative;
+      font-size: 20px;
+    }
+
+    /* Night background */
+    .night {
+      background: linear-gradient(to bottom, #0d0d2b, #1b1b3a);
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle 2s infinite ease-in-out;
+      z-index: 0;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 0.3; }
+    }
+
+    .moon {
+      position: absolute;
+      top: 50px;
+      right: 80px;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(white 50%, transparent 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 30px 10px white;
+      opacity: 0.4;
+      z-index: 0;
+    }
+
+    /* Shooting stars */
+    .shooting-star {
+      position: absolute;
+      width: 2px;
+      height: 80px;
+      background: linear-gradient(white, transparent);
+      opacity: 0.8;
+      transform: rotate(45deg);
+      animation: shoot 1s ease-out forwards;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    @keyframes shoot {
+      0% {
+        transform: translate(0, 0) rotate(45deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-600px, 600px) rotate(45deg);
+        opacity: 0;
+      }
+    }
+
+    .bg-decor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-decor span {
+      position: absolute;
+      color: pink;
+      font-size: 24px;
+      animation: floatUp 6s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) scale(1); opacity: 0.5; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+
+    .envelope-wrapper {
+      position: relative;
+      width: 300px;
+      height: 200px;
+      perspective: 1000px;
+      z-index: 2;
+    }
+
+    .envelope {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .flap-top,
+    .flap-bottom,
+    .flap-side-left,
+    .flap-side-right {
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.07),
+        rgba(255, 255, 255, 0.07) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+    }
+
+    .flap-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-bottom: 100px solid #f48fb1;
+      z-index: 3;
+      transition: transform 1s;
+      transform-origin: top center;
+    }
+
+    .flap-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-top: 100px solid #f06292;
+      z-index: 1;
+    }
+
+    .flap-side-left {
+      position: absolute;
+      top: 100px;
+      left: 0;
+      border-top: 100px solid transparent;
+      border-right: 150px solid #f8bbd0;
+    }
+
+    .flap-side-right {
+      position: absolute;
+      top: 100px;
+      right: 0;
+      border-top: 100px solid transparent;
+      border-left: 150px solid #f8bbd0;
+    }
+
+    .message {
+      position: absolute;
+      top: 40px;
+      left: 20px;
+      right: 20px;
+      background: white;
+      height: 120px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      z-index: 2;
+      opacity: 0;
+      padding: 10px;
+      text-align: center;
+      transform: translateY(30px);
+      transition: opacity 1s, transform 1s;
+    }
+
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    button {
+      background: #f48fb1;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .open .flap-top {
+      transform: rotateX(-180deg);
+    }
+
+    .open .message {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Polaroid Photo Stack */
+    .photo-stack {
+      margin-top: 30px;
+      cursor: pointer;
+      z-index: 2;
+      transition: opacity 0.5s;
+    }
+
+    .polaroid {
+      width: 250px;
+      background: white;
+      padding: 10px 10px 30px;
+      border: 2px solid #ddd;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      text-align: center;
+      position: relative;
+    }
+
+    .polaroid img {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .caption {
+      margin-top: 10px;
+      font-size: 25px;
+      color: #555;
+    }
+
+    /* Countdown */
+    .countdown {
+      font-size: 40px;
+      margin-top: 10px;
+      color: #e91e63;
+      z-index: 2;
+    }
+
+    /* Quote carousel */
+    .quote-carousel {
+      margin-top: 20px;
+      text-align: center;
+      max-width: 300px;
+      font-size: 30px;
+      color: #ec407a;
+      transition: opacity 0.6s;
+    }
+
+    /* Heart trail */
+    .heart {
+      position: absolute;
+      font-size: 30px;
+      color: #e91e63;
+      animation: fadeUp 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 0;
+        transform: translateY(-30px) scale(1.5);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background decor -->
+<div class="bg-decor">
+  <span style="left:10%; animation-delay: 0s;">❀</span>
+  <span style="left:25%; animation-delay: 2s;">♥</span>
+  <span style="left:40%; animation-delay: 4s;">❀</span>
+  <span style="left:60%; animation-delay: 1s;">♥</span>
+  <span style="left:80%; animation-delay: 3s;">❀</span>
+</div>
+
+<!-- Night elements -->
+<div class="moon" id="moon"></div>
+<div id="shooting-stars-container"></div>
+
+<!-- Envelope -->
+<div class="envelope-wrapper" id="envelopeWrapper">
+  <div class="envelope">
+    <div class="flap-top"></div>
+    <div class="flap-side-left"></div>
+    <div class="flap-side-right"></div>
+    <div class="flap-bottom"></div>
+    <div class="message">HAPPY 26 MONTHS OF LOVE BABY, I LOVE YOUUU SO MUCH</div>
+  </div>
+</div>
+
+<!-- Countdown -->
+<div class="countdown" id="countdown">Loading countdown...</div>
+
+<!-- Buttons -->
+<div class="buttons">
+  <button onclick="openEnvelope()">Open Envelope</button>
+  <button onclick="closeEnvelope()">Close Envelope</button>
+</div>
+
+<!-- Polaroid -->
+<div class="photo-stack" onclick="nextPhoto()">
+  <div class="polaroid" id="photoContainer">
+    <img id="photo" src="1.jpg" alt="Memory">
+    <div class="caption" id="photo-caption">A picture of you from our 1st library date</div>
+  </div>
+</div>
+
+<!-- Love Quote -->
+<div class="quote-carousel" id="quoteCarousel">"You're the one I’ve been waiting for."</div>
+
+<!-- Audio -->
+<audio id="bg-music" src="Ariana Grande - Lovin' It (with lyrics).mp3" preload="auto"></audio>
+<audio id="click-sound" src="click.mp3" preload="auto"></audio>
+
+<script>
+  function openEnvelope() {
+    document.getElementById("envelopeWrapper").classList.add("open");
+    const music = document.getElementById("bg-music");
+    music.play().catch(() => {});
+  }
+
+  function closeEnvelope() {
+    document.getElementById("envelopeWrapper").classList.remove("open");
+    const music = document.getElementById("bg-music");
+    music.pause();
+    music.currentTime = 0;
+  }
+
+  const pictures = [
+    { src: '1.jpg', caption: 'A picture of you from our 1st library date' },
+    { src: '2.jpeg', caption: '1st Flower I gave You' },
+    { src: 'anivb.png', caption: 'Our 1st Anniversary' },
+    { src: 'sm.jpg', caption: 'Sm afterclass Era' },
+    { src: 'nakshit.png', caption: 'Our 1st Nakshits' },
+    { src: 'pretty.jpeg', caption: 'Super Gorgeous' }
+  ];
+
+  let currentIndex = 0;
+  const photo = document.getElementById('photo');
+  const caption = document.getElementById('photo-caption');
+  const photoContainer = document.getElementById('photoContainer');
+  const clickSound = document.getElementById('click-sound');
+
+  function nextPhoto() {
+    clickSound.play();
+    photoContainer.style.opacity = 0;
+    setTimeout(() => {
+      currentIndex = (currentIndex + 1) % pictures.length;
+      photo.src = pictures[currentIndex].src;
+      caption.textContent = pictures[currentIndex].caption;
+      photoContainer.style.opacity = 1;
+    }, 300);
+  }
+
+  const quotes = [
+    "“You are my safest place.",
+    "“I still fall for you every single day.”",
+    "“Together is my favorite place to be.”",
+    "“You make my heart smile.”",
+    "“You are special, kind, pretty, and my baby.”"
+  ];
+
+  let quoteIndex = 0;
+  const quoteEl = document.getElementById('quoteCarousel');
+
+  setInterval(() => {
+    quoteEl.style.opacity = 0;
+    setTimeout(() => {
+      quoteIndex = (quoteIndex + 1) % quotes.length;
+      quoteEl.textContent = quotes[quoteIndex];
+      quoteEl.style.opacity = 1;
+    }, 400);
+  }, 4000);
+
+  // Countdown
+  const countdown = document.getElementById("countdown");
+  const targetDate = new Date("2025-05-21T00:00:00");
+
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+      countdown.textContent = "Happy 27th Monthsary!!";
+
+    } else {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+      countdown.textContent = `${days}d ${hours}h ${mins}m ${secs}s until our 27th month!`;
+    }
+  }
+
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  // Night theme
+  const hour = new Date().getHours();
+  if (hour >= 18 || hour < 6) {
+    document.body.classList.add("night");
+
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.animationDelay = `${Math.random() * 3}s`;
+      document.body.appendChild(star);
+    }
+
+    setInterval(() => {
+      if (Math.random() < 0.7) {
+        const star = document.createElement("div");
+        star.classList.add("shooting-star");
+        star.style.top = `${Math.random() * 40 + 10}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        document.getElementById("shooting-stars-container").appendChild(star);
+        setTimeout(() => star.remove(), 1200);
+      }
+    }, 3000 + Math.random() * 3000);
+  }
+
+  // Heart trail
+  document.addEventListener("click", (e) => {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.style.left = `${e.pageX}px`;
+    heart.style.top = `${e.pageY}px`;
+    heart.textContent = "♥";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1000);
+  });
+</script>
+</body>
+</html>
